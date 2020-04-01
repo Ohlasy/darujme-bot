@@ -1,0 +1,15 @@
+name: Run
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build & Run
+      run: |
+        yarn install
+        DARUJME_ID={{ secrets.DARUJME_ID }} DARUJME_SECRET={{ secrets.DARUJME_SECRET }} SLACK_TOKEN={{ secrets.SLACK_TOKEN}} yarn start
