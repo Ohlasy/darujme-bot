@@ -1,12 +1,8 @@
 import { Credentials, getTransactions } from "./darujme";
+import { Stats, renderStats } from "./stats";
 import * as slack from "slack";
 
-interface Stats {
-  recurringIncome: number;
-  oneTimeIncome: number;
-}
-
-async function getStats(
+async function downloadStats(
   credentials: Credentials,
   startDate: Date,
   endDate: Date
@@ -31,30 +27,10 @@ async function getStats(
   }
 }
 
-function renderStats(startDate: Date, endDate: Date, stats: Stats): string {
-  const locale = "cs-CZ";
-  const fmtd = new Intl.DateTimeFormat(locale).format;
-  const fmtc = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "CZK",
-    maximumFractionDigits: 0,
-    minimumFractionDigits: 0
-  }).format;
-  const total = stats.recurringIncome + stats.oneTimeIncome;
-  const text = `
-  Za týden od ${fmtd(startDate)} do ${fmtd(endDate)} nám čtenáři poslali
-  celkem ${fmtc(total)}, z toho ${fmtc(stats.recurringIncome)} dělají
-  opakované dary a ${fmtc(stats.oneTimeIncome)} dary jednorázové. 🎉
-  `
-    .replace(/\n\s*/g, " ")
-    .trim();
-  return text;
-}
-
 async function main(credentials: Credentials, slackToken: string) {
   const endDate = new Date();
   const startDate = new Date(Date.now() - 6 * 24 * 3600 * 1000);
-  const stats = await getStats(credentials, startDate, endDate);
+  const stats = await downloadStats(credentials, startDate, endDate);
   const msg =
     stats != null
       ? renderStats(startDate, endDate, stats)
