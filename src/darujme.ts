@@ -11,9 +11,7 @@ export interface TransactionResponse {
 
 export interface Transaction {
   transactionId: number;
-  state: string;
   sentAmount: Amount;
-  outgoingAmount: Amount;
   pledge: Pledge;
 }
 
@@ -60,7 +58,8 @@ export async function getTransactions(
   );
 }
 
-function formatDate(date: Date): string {
+/** Format date to a string used in the Darujme API (YYYY-MM-dd) */
+export function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();

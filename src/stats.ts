@@ -1,3 +1,5 @@
+import { Transaction } from "./darujme";
+
 export interface Stats {
   recurringIncome: number;
   oneTimeIncome: number;
@@ -25,4 +27,19 @@ export function renderStats(
     .replace(/\n\s*/g, " ")
     .trim();
   return text;
+}
+
+export function calculateStats(transactions: Transaction[]): Stats {
+  const recurrentSum = transactions
+    .filter(t => t.pledge.isRecurrent)
+    .map(t => t.sentAmount.cents)
+    .reduce((a, b) => a + b, 0);
+  const oneTimeSum = transactions
+    .filter(t => !t.pledge.isRecurrent)
+    .map(t => t.sentAmount.cents)
+    .reduce((a, b) => a + b, 0);
+  return {
+    recurringIncome: recurrentSum / 100,
+    oneTimeIncome: oneTimeSum / 100
+  };
 }

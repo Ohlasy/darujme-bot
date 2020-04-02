@@ -1,5 +1,5 @@
 import { Credentials, getTransactions } from "./darujme";
-import { Stats, renderStats } from "./stats";
+import { Stats, renderStats, calculateStats } from "./stats";
 import * as slack from "slack";
 
 async function downloadStats(
@@ -9,18 +9,7 @@ async function downloadStats(
 ): Promise<Stats | null> {
   try {
     const txs = await getTransactions(credentials, startDate, endDate);
-    const recurrentSum = txs
-      .filter(t => t.pledge.isRecurrent)
-      .map(t => t.sentAmount.cents)
-      .reduce((a, b) => a + b, 0);
-    const oneTimeSum = txs
-      .filter(t => !t.pledge.isRecurrent)
-      .map(t => t.sentAmount.cents)
-      .reduce((a, b) => a + b, 0);
-    return {
-      recurringIncome: recurrentSum / 100,
-      oneTimeIncome: oneTimeSum / 100
-    };
+    return calculateStats(txs);
   } catch (err) {
     console.error(err);
     return null;
