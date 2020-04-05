@@ -16,4 +16,4 @@ jobs:
     - name: Build & Run
       run: |
         yarn install
-        DARUJME_ID={{ secrets.DARUJME_ID }} DARUJME_SECRET={{ secrets.DARUJME_SECRET }} SLACK_TOKEN={{ secrets.SLACK_TOKEN}} yarn start
+        DARUJME_ID=${{ secrets.DARUJME_ID }} DARUJME_SECRET=${{ secrets.DARUJME_SECRET }} SLACK_TOKEN=${{ secrets.SLACK_TOKEN}} yarn start
