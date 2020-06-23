@@ -1,10 +1,5 @@
 import axios from "axios";
 
-export interface Credentials {
-  apiId: string;
-  apiSecret: string;
-}
-
 export interface TransactionResponse {
   transactions: Transaction[];
 }
@@ -25,8 +20,18 @@ export interface Pledge {
   isRecurrent: boolean;
 }
 
+export interface GiftReport {
+  fromDate: Date;
+  toDate: Date;
+  totalTransactions: number;
+  recurrentGifts: number;
+  oneTimeGifts: number;
+  totalGifts: number;
+}
+
 async function call<T>(
-  credentials: Credentials,
+  apiId: string,
+  apiSecret: string,
   path: string,
   params: { [key: string]: string } = {},
   extract: (data: any) => T = (d: any) => d
@@ -35,28 +40,59 @@ async function call<T>(
   const endpoint = baseUrl + "/" + path;
   const response = await axios.get(endpoint, {
     params: {
-      ...credentials,
-      ...params
-    }
+      apiId,
+      apiSecret,
+      ...params,
+    },
   });
   return extract(response.data);
 }
 
 export async function getTransactions(
-  credentials: Credentials,
+  apiId: string,
+  apiSecret: string,
   fromDate: Date,
   toDate: Date
 ): Promise<Transaction[]> {
   return call(
-    credentials,
+    apiId,
+    apiSecret,
     "transactions-by-filter",
     {
       fromReceivedDate: formatDate(fromDate),
-      toReceivedDate: formatDate(toDate)
+      toReceivedDate: formatDate(toDate),
     },
-    data => data.transactions
+    (data) => data.transactions
   );
 }
+
+export async function getGiftReport(
+  apiId: string,
+  apiSecret: string,
+  reportingPeriodDays: number
+): Promise<GiftReport> {
+  const msPerDay = 1000 * 3600 * 24;
+  const endDate = new Date();
+  const startDate = new Date(Date.now() - reportingPeriodDays * msPerDay);
+  const txs = await getTransactions(apiId, apiSecret, startDate, endDate);
+  return {
+    fromDate: startDate,
+    toDate: endDate,
+    totalTransactions: txs.length,
+    recurrentGifts: getRecurrentGifts(txs),
+    oneTimeGifts: getOneTimeGifts(txs),
+    totalGifts: getRecurrentGifts(txs) + getOneTimeGifts(txs),
+  };
+}
+
+export const getRecurrentGifts = (txs: Transaction[]) =>
+  sumTransactions(txs.filter((t) => t.pledge.isRecurrent));
+
+export const getOneTimeGifts = (txs: Transaction[]) =>
+  sumTransactions(txs.filter((t) => !t.pledge.isRecurrent));
+
+export const sumTransactions = (txs: Transaction[]) =>
+  txs.map((t) => t.sentAmount.cents).reduce((a, b) => a + b, 0) / 100;
 
 /** Format date to a string used in the Darujme API (YYYY-MM-dd) */
 export function formatDate(date: Date): string {
