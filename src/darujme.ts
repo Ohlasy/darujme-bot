@@ -23,6 +23,7 @@ export interface Pledge {
 export interface GiftReport {
   fromDate: Date;
   toDate: Date;
+  timestamp: Date;
   totalTransactions: number;
   recurrentGifts: number;
   oneTimeGifts: number;
@@ -78,6 +79,7 @@ export async function getGiftReport(
   return {
     fromDate: startDate,
     toDate: endDate,
+    timestamp: new Date(),
     totalTransactions: txs.length,
     recurrentGifts: getRecurrentGifts(txs),
     oneTimeGifts: getOneTimeGifts(txs),
