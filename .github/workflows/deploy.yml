@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: "13.x"
-      - name: Build & Run
+      - name: Build & Test & Run
         env:
           DARUJME_ID: ${{ secrets.DARUJME_ID }}
           DARUJME_SECRET: ${{ secrets.DARUJME_SECRET }}
@@ -23,6 +23,7 @@ jobs:
           ANALYTICS_KEY: ${{ secrets.ANALYTICS_KEY }}
         run: |
           yarn install
+          yarn test
           yarn start
       - name: Prepare for upload
         run: |
