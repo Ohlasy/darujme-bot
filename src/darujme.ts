@@ -25,9 +25,10 @@ export interface GiftReport {
   toDate: Date;
   timestamp: Date;
   totalTransactions: number;
-  recurrentGifts: number;
-  oneTimeGifts: number;
-  totalGifts: number;
+  recurrentDonations: number;
+  oneTimeDonations: number;
+  totalDonations: number;
+  summary?: string;
 }
 
 async function call<T>(
@@ -76,15 +77,17 @@ export async function getGiftReport(
   const endDate = new Date();
   const startDate = new Date(Date.now() - reportingPeriodDays * msPerDay);
   const txs = await getTransactions(apiId, apiSecret, startDate, endDate);
-  return {
+  const report: GiftReport = {
     fromDate: startDate,
     toDate: endDate,
     timestamp: new Date(),
     totalTransactions: txs.length,
-    recurrentGifts: getRecurrentGifts(txs),
-    oneTimeGifts: getOneTimeGifts(txs),
-    totalGifts: getRecurrentGifts(txs) + getOneTimeGifts(txs),
+    recurrentDonations: getRecurrentGifts(txs),
+    oneTimeDonations: getOneTimeGifts(txs),
+    totalDonations: getRecurrentGifts(txs) + getOneTimeGifts(txs),
   };
+  report.summary = renderGiftReportSummary(report);
+  return report;
 }
 
 export const getRecurrentGifts = (txs: Transaction[]) =>
@@ -103,4 +106,24 @@ export function formatDate(date: Date): string {
   const day = date.getDate();
   const fmt = (x: number) => x.toString().padStart(2, "0");
   return [year, month, day].map(fmt).join("-");
+}
+
+export function renderGiftReportSummary(report: GiftReport): string {
+  const locale = "cs-CZ";
+  const fmtd = new Intl.DateTimeFormat(locale).format;
+  const fmtc = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "CZK",
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  }).format;
+  const text = `
+    Od ${fmtd(report.fromDate)} do ${fmtd(report.toDate)} nám čtenáři
+    poslali celkem ${fmtc(report.totalDonations)}, z toho
+    ${fmtc(report.recurrentDonations)} dělají opakované dary
+    a ${fmtc(report.oneTimeDonations)} dary jednorázové.
+    `
+    .replace(/\n\s*/g, " ")
+    .trim();
+  return text;
 }
