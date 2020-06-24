@@ -1,5 +1,6 @@
 import { getGiftReport } from "./darujme";
 import { writeFileSync } from "fs";
+import { queryTopArticles } from "./analytics";
 
 function envOrDie(key: string): string {
   const val = process.env[key];
@@ -9,12 +10,26 @@ function envOrDie(key: string): string {
   return val;
 }
 
-async function main() {
+const toJSON = (data: any) => JSON.stringify(data, null, 2);
+
+async function downloadDonationStats() {
   const apiId = envOrDie("DARUJME_ID");
   const apiSecret = envOrDie("DARUJME_SECRET");
   const oneMonthBack = 30;
   const report = await getGiftReport(apiId, apiSecret, oneMonthBack);
-  writeFileSync("dary.json", JSON.stringify(report, null, 2));
+  writeFileSync("dary.json", toJSON(report));
+}
+
+async function downloadAnalytics() {
+  const email = envOrDie("ANALYTICS_MAIL");
+  const privateKey = envOrDie("ANALYTICS_KEY");
+  const tops = await queryTopArticles(email, privateKey);
+  writeFileSync("top-articles.json", toJSON(tops));
+}
+
+async function main() {
+  await downloadAnalytics();
+  await downloadDonationStats();
 }
 
 main().catch((e) => console.error(e));

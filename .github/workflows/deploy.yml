@@ -1,0 +1,41 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "5 2 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "13.x"
+      - name: Build & Run
+        env:
+          DARUJME_ID: ${{ secrets.DARUJME_ID }}
+          DARUJME_SECRET: ${{ secrets.DARUJME_SECRET }}
+          ANALYTICS_MAIL: ${{ secrets.ANALYTICS_MAIL }}
+          ANALYTICS_KEY: ${{ secrets.ANALYTICS_KEY }}
+        run: |
+          yarn install
+          yarn start
+      - name: Prepare for upload
+        run: |
+          mkdir dist
+          mv *.json dist
+      - name: Upload artifacts
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --acl public-read
+        env:
+          AWS_S3_BUCKET: data.ohlasy.info
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET }}
+          AWS_REGION: "eu-central-1"
+          SOURCE_DIR: "dist"
+          DEST_DIR: "stats"
