@@ -1,3 +1,4 @@
-## Statistiky darů
+Skripty běží na commit a jednou denně. Exportovaná data:
 
-Skript běží jednou denně a ukládá [sem](https://data.ohlasy.info/stats/dary.json) strojově čitelný přehled darů od čtenářů za posledních 30 dní.
+* [Přehled darů od čtenářů](https://data.ohlasy.info/stats/dary.json)
+* [Nejčtenější články](https://data.ohlasy.info/stats/top-articles.json)
