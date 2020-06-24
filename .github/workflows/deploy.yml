@@ -27,7 +27,7 @@ jobs:
       - name: Prepare for upload
         run: |
           mkdir dist
-          mv *.json dist
+          mv dary.json top-articles.json dist
       - name: Upload artifacts
         uses: jakejarvis/s3-sync-action@master
         with:
