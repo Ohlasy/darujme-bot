@@ -15,8 +15,8 @@ const toJSON = (data: any) => JSON.stringify(data, null, 2);
 async function downloadDonationStats() {
   const apiId = envOrDie("DARUJME_ID");
   const apiSecret = envOrDie("DARUJME_SECRET");
-  const oneMonthBack = 30;
-  const report = await getGiftReport(apiId, apiSecret, oneMonthBack);
+  const oneYearBack = 365;
+  const report = await getGiftReport(apiId, apiSecret, oneYearBack);
   writeFileSync("dary.json", toJSON(report));
 }
 
