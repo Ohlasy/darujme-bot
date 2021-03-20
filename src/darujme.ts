@@ -6,7 +6,7 @@ export interface TransactionResponse {
 
 export interface Transaction {
   transactionId: number;
-  sentAmount: Amount;
+  sentAmount: Amount | null;
   pledge: Pledge;
 }
 
@@ -97,7 +97,7 @@ export const getOneTimeGifts = (txs: Transaction[]) =>
   sumTransactions(txs.filter((t) => !t.pledge.isRecurrent));
 
 export const sumTransactions = (txs: Transaction[]) =>
-  txs.map((t) => t.sentAmount.cents).reduce((a, b) => a + b, 0) / 100;
+  txs.map((t) => t.sentAmount?.cents || 0).reduce((a, b) => a + b, 0) / 100;
 
 /** Format date to a string used in the Darujme API (YYYY-MM-dd) */
 export function formatDate(date: Date): string {

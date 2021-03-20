@@ -30,6 +30,14 @@ test("Stats calculation", () => {
       },
     },
     {
+      transactionId: 2391206,
+      sentAmount: null,
+      pledge: {
+        pledgeId: 1863762,
+        isRecurrent: true,
+      },
+    },
+    {
       transactionId: 3,
       sentAmount: {
         cents: 400_00,
